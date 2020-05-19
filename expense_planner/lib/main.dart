@@ -35,6 +35,9 @@ class MyApp extends StatelessWidget {
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
+                  button: TextStyle(
+                    color: Colors.white,
+                  ),
                 ),
           )),
     );
@@ -47,35 +50,31 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<Transaction> _userTransactions = [
-//    Transaction(
-//      id: 't1',
-//      title: 'Mangoes',
-//      amount: 65.50,
-//      date: DateTime.now(),
-//    ),
-//    Transaction(
-//      id: 't2',
-//      title: 'Vanila Essense',
-//      amount: 35,
-//      date: DateTime.now(),
-//    ),
-  ];
+  final List<Transaction> _userTransactions = [];
+  var _showChart = false;
 
   List<Transaction> get _recentTransactions {
-    return _userTransactions.where(
-        (tx) => tx.date.isAfter(DateTime.now().subtract(Duration(days: 7)))).toList();
+    return _userTransactions
+        .where(
+            (tx) => tx.date.isAfter(DateTime.now().subtract(Duration(days: 7))))
+        .toList();
   }
 
-  void _addTransaction(String title, double amount) {
+  void _addTransaction(String title, double amount, DateTime expenseDate) {
     final transaction = Transaction(
       id: DateTime.now().toString(),
       title: title,
       amount: amount,
-      date: DateTime.now(),
+      date: expenseDate,
     );
     setState(() {
       _userTransactions.add(transaction);
+    });
+  }
+
+  void _deleteTransaction(int index) {
+    setState(() {
+      _userTransactions.removeAt(index);
     });
   }
 
@@ -89,22 +88,67 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape =
+        mediaQuery.orientation == Orientation.landscape;
+    final appBar = AppBar(
+      title: Text('Personal Expenses'),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () => startAddNewTransaction(context),
+        )
+      ],
+    );
+    var txListWidget = Container(
+      height: (mediaQuery.size.height -
+              appBar.preferredSize.height -
+              mediaQuery.padding.top) *
+          0.75,
+      child: TransactionList(_userTransactions, _deleteTransaction),
+    );
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Personal Expenses'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => startAddNewTransaction(context),
-          )
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Chart(_recentTransactions),
-          TransactionList(_userTransactions)
-        ],
+      appBar: appBar,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (isLandscape)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Show Chart'),
+                  Switch(
+                    value: _showChart,
+                    onChanged: (val) {
+                      setState(() {
+                        _showChart = val;
+                      });
+                    },
+                  )
+                ],
+              ),
+            if (!isLandscape)
+              Container(
+                height: (mediaQuery.size.height -
+                        appBar.preferredSize.height -
+                        mediaQuery.padding.top) *
+                    0.3,
+                child: Chart(_recentTransactions),
+              ),
+            if (!isLandscape) txListWidget,
+            if (isLandscape)
+              _showChart
+                  ? Container(
+                      height: (mediaQuery.size.height -
+                              appBar.preferredSize.height -
+                              mediaQuery.padding.top) *
+                          0.7,
+                      child: Chart(_recentTransactions),
+                    )
+                  : txListWidget,
+          ],
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
