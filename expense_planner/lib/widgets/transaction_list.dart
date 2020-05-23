@@ -1,6 +1,5 @@
+import './transaction_item.dart';
 import '../models/transaction.dart';
-import 'package:intl/intl.dart';
-
 import 'package:flutter/material.dart';
 
 class TransactionList extends StatelessWidget {
@@ -37,43 +36,10 @@ class TransactionList extends StatelessWidget {
             )
           : ListView.builder(
               itemBuilder: (context, index) {
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
-                  elevation: 6,
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      child: Padding(
-                        padding: const EdgeInsets.all(6.0),
-                        child: FittedBox(
-                            child: Text(
-                                '₹${_userTransactions[index].amount.toStringAsFixed(2)}')),
-                      ),
-                      radius: 30,
-                    ),
-                    title: Text(
-                      _userTransactions[index].title,
-                      style: Theme.of(context).textTheme.title,
-                    ),
-                    subtitle: Text(
-                      DateFormat()
-                          .add_yMMMd()
-                          .format(_userTransactions[index].date),
-                    ),
-                    trailing: MediaQuery.of(context).size.width > 480
-                        ? FlatButton.icon(
-                            onPressed: () => _deleteTransaction(index),
-                            icon: Icon(Icons.delete_forever),
-                            label: Text('Delete'),
-                            textColor: Theme.of(context).errorColor,
-                          )
-                        : IconButton(
-                            icon: Icon(
-                              Icons.delete_forever,
-                              color: Theme.of(context).errorColor,
-                            ),
-                            onPressed: () => _deleteTransaction(index),
-                          ),
-                  ),
+                return TransactionItem(
+                  key: ValueKey(_userTransactions[index].id),
+                  userTransaction: _userTransactions[index],
+                  deleteTransaction: _deleteTransaction,
                 );
               },
               itemCount: _userTransactions.length,
