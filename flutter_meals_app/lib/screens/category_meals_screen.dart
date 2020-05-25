@@ -3,7 +3,7 @@ import '../widgets/meal_item.dart';
 import '../dummy_data.dart';
 
 class CategoryMealsScreen extends StatelessWidget {
-  static String route = '/category-meals';
+  static String routeName = '/category-meals';
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +22,7 @@ class CategoryMealsScreen extends StatelessWidget {
         itemBuilder: (ctx, index) {
           var meal = categoryMeals[index];
           return MealItem(
+            id: meal.id,
             title: meal.title,
             imageUrl: meal.imageUrl,
             affordability: meal.affordability,
