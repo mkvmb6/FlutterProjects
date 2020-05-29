@@ -11,7 +11,6 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  // This widget is the root of your application.
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -24,6 +23,7 @@ class _MyAppState extends State<MyApp> {
     'vegetarian': false
   };
   List<Meal> _availableMeals = DUMMY_MEALS;
+  final List<Meal> _favouriteMeals = [];
 
   void _setFilters(Map<String, bool> filters) {
     setState(() {
@@ -44,6 +44,24 @@ class _MyAppState extends State<MyApp> {
         return true;
       }).toList();
     });
+  }
+
+  void _toggleFavourite(String mealId) {
+    var existingIndex = _favouriteMeals.indexWhere((meal) => meal.id == mealId);
+    if (existingIndex == -1) {
+      setState(() {
+        _favouriteMeals
+            .add(DUMMY_MEALS.firstWhere((meal) => meal.id == mealId));
+      });
+    } else {
+      setState(() {
+        _favouriteMeals.removeAt(existingIndex);
+      });
+    }
+  }
+
+  bool _isFavourite(String mealId) {
+    return _favouriteMeals.any((meal) => meal.id == mealId);
   }
 
   @override
@@ -72,17 +90,20 @@ class _MyAppState extends State<MyApp> {
       ),
       //home: TabsScreen(),
       routes: {
-        '/': (ctx) => TabsScreen(),
+        '/': (ctx) => TabsScreen(_favouriteMeals),
         CategoryMealsScreen.routeName: (ctx) =>
             CategoryMealsScreen(_availableMeals),
-        MealDetailScreen.routeName: (ctx) => MealDetailScreen(),
+        MealDetailScreen.routeName: (ctx) => MealDetailScreen(
+              toggleFavourite: _toggleFavourite,
+              isFavourite: _isFavourite,
+            ),
         FiltersScreen.routeName: (ctx) => FiltersScreen(_setFilters, _filters),
       },
       onGenerateRoute: (settings) {
-        return MaterialPageRoute(builder: (ctx) => TabsScreen());
+        return MaterialPageRoute(builder: (ctx) => TabsScreen(_favouriteMeals));
       },
       onUnknownRoute: (setting) {
-        return MaterialPageRoute(builder: (ctx) => TabsScreen());
+        return MaterialPageRoute(builder: (ctx) => TabsScreen(_favouriteMeals));
       },
     );
   }
